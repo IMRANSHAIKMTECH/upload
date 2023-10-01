@@ -142,26 +142,72 @@ def login():
             session['user_id'] = 'admin'  # Set a session variable for admin
             return redirect(url_for('admin_page'))
 
-        # Query the User table to find a user with the given username and password
-        user = User.query.filter_by(email=username, password=password).first()
+        try:
+            conn = connect_to_db()
+            if conn is not None:
+                cursor = conn.cursor()
 
-        if user is not None:
-            session['user_id'] = user.id  # Set a session variable for the authenticated user
-            flash('Logged in successfully!', 'success')
-            return redirect(url_for('user_dashboard'))
-        else:
+                # Execute a SELECT query to find a user with the given username and password
+                select_query = "SELECT id FROM user_data WHERE email = %s AND password = %s"
+                cursor.execute(select_query, (username, password))
+                user_id = cursor.fetchone()
+
+                # Close the cursor and connection
+                cursor.close()
+                conn.close()
+
+                if user_id:
+                    session['user_id'] = user_id[0]  # Set a session variable for the authenticated user
+                    flash('Logged in successfully!', 'success')
+                    return redirect(url_for('user_dashboard'))
+                else:
+                    flash('Login failed. Please check your credentials.', 'danger')
+            else:
+                flash('Database connection failed.', 'danger')
+        except Exception as e:
             flash('Login failed. Please check your credentials.', 'danger')
+            print("Error during login:", str(e))
 
     return render_template('index.html')
 
 @app.route('/admin')
 def admin_page():
     if 'user_id' in session:
-        # Use SQLAlchemy to fetch users
-        users = User.query.all()
-        return render_template('admin.html', users=users)
+        try:
+            conn = connect_to_db()
+            if conn is not None:
+                cursor = conn.cursor()
+
+                # Execute a SELECT query to fetch all user records
+                select_query = "SELECT id, email, password, created_date, expiry_date FROM user_data"
+                cursor.execute(select_query)
+
+                # Fetch all rows and store them in a list of dictionaries
+                users = []
+                for row in cursor.fetchall():
+                    id, email, password, created_date, expiry_date = row
+                    users.append({
+                        'id': id,
+                        'email': email,
+                        'password': password,
+                        'created_date': created_date.strftime('%Y-%m-%d'),
+                        'expiry_date': expiry_date.strftime('%Y-%m-%d') if expiry_date else None
+                    })
+
+                # Close the cursor and connection
+                cursor.close()
+                conn.close()
+
+                return render_template('admin.html', users=users)
+            else:
+                flash('Database connection failed.', 'danger')
+                return redirect(url_for('login'))
+        except Exception as e:
+            flash('Error fetching users: ' + str(e), 'danger')
+            return redirect(url_for('login'))
     else:
         return redirect(url_for('login'))
+
 
 # Route to update user based on email address
 @app.route('/update_user/<string:email>', methods=['POST'])
@@ -170,77 +216,127 @@ def update_user(email):
     try:
         # Parse the date string to a datetime object
         updated_expiry_date = datetime.strptime(updated_expiry_date_str, '%Y-%m-%d')
-        
-        # Use SQLAlchemy to query for the user by email
-        user = User.query.filter_by(email=email).first()
-        
-        if user:
-            user.expiry_date = updated_expiry_date  # Update the user's expiry date
-            db.session.commit()  # Commit changes using SQLAlchemy
+
+        # Connect to the database
+        conn = connect_to_db()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            # Execute an UPDATE query to update the user's expiry_date
+            update_query = "UPDATE user_data SET expiry_date = %s WHERE email = %s"
+            cursor.execute(update_query, (updated_expiry_date, email))
+
+            # Commit the changes and close the cursor and connection
+            conn.commit()
+            cursor.close()
+            conn.close()
+
             flash('User expiration date updated successfully!', 'success')
         else:
-            flash('User not found.', 'danger')
+            flash('Database connection failed.', 'danger')
     except Exception as e:
-        flash(f'Error updating user: {str(e)}', 'danger')
-    
-    return redirect(url_for('admin_page'))
+        flash('Error updating user: ' + str(e), 'danger')
 
+    return redirect(url_for('admin_page'))
 
 # Route to delete user based on email address
 @app.route('/delete_user/<string:email>')
 def delete_user(email):
     try:
-        # Use SQLAlchemy to query for the user by email
-        user = User.query.filter_by(email=email).first()
-        
-        if user:
-            db.session.delete(user)  # Delete the user object
-            db.session.commit()  # Commit changes using SQLAlchemy
+        # Connect to the database
+        conn = connect_to_db()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            # Execute a DELETE query to delete the user by email
+            delete_query = "DELETE FROM user_data WHERE email = %s"
+            cursor.execute(delete_query, (email,))
+
+            # Commit the changes and close the cursor and connection
+            conn.commit()
+            cursor.close()
+            conn.close()
+
             flash('User deleted successfully!', 'success')
         else:
-            flash('User not found.', 'danger')
+            flash('Database connection failed.', 'danger')
     except Exception as e:
-        flash(f'Error deleting user: {str(e)}', 'danger')
-    
+        flash('Error deleting user: ' + str(e), 'danger')
+
     return redirect(url_for('admin_page'))
 
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
     new_username = request.form.get('new_username')
-    new_password = request.form.get('new_password')  
+    new_password = request.form.get('new_password')
     new_expiry_date = request.form.get('expiry_date')
-    
-    try:
-        new_user = User(email=new_username, password=new_password, created_date=datetime.now(), expiry_date=new_expiry_date)
-        db.session.add(new_user)  # Add the new user object to the session
-        db.session.commit()  # Commit changes using SQLAlchemy
 
-        flash('New user added successfully!', 'success')
+    try:
+        # Connect to the database
+        conn = connect_to_db()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            # Execute an INSERT query to add the new user
+            insert_query = "INSERT INTO user_data (email, password, created_date, expiry_date) VALUES (%s, %s, %s, %s)"
+            cursor.execute(insert_query, (new_username, new_password, datetime.now(), new_expiry_date))
+
+            # Commit the changes and close the cursor and connection
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            flash('New user added successfully!', 'success')
+        else:
+            flash('Database connection failed.', 'danger')
     except Exception as e:
-        flash(f'Error adding new user: {str(e)}', 'danger')
-        print(f"Error adding new user: {str(e)}")  
+        flash('Error adding new user: ' + str(e), 'danger')
 
     return redirect(url_for('admin_page'))
+
 
 
 @app.route('/user_dashboard')
 def user_dashboard():
     if 'user_id' in session:
-        user = User.query.get(session['user_id'])  # Retrieve the user based on user_id
+        user_id = session['user_id']
+        user_data = None
 
-        # Check if the user has an expiry date
-        if user.expiry_date:
-            current_date = datetime.now().date()
-            days_left = (user.expiry_date - current_date).days
-            subscription_days_left = days_left
-        else:
-            subscription_days_left = None
-            return("Subscription Expired")
+        try:
+            # Connect to the database
+            conn = connect_to_db()
+            if conn is not None:
+                cursor = conn.cursor()
 
-        return render_template('user.html', user_email=user.email, subscription_days_left=subscription_days_left)
-    
+                # Execute a SELECT query to retrieve user data based on user_id
+                select_query = "SELECT email, expiry_date FROM user_data WHERE id = %s"
+                cursor.execute(select_query, (user_id,))
+                user_data = cursor.fetchone()
+
+                # Close the cursor and connection
+                cursor.close()
+                conn.close()
+
+                if user_data:
+                    user_email, expiry_date = user_data
+                    # Check if the user has an expiry date
+                    if expiry_date:
+                        current_date = datetime.now().date()
+                        days_left = (expiry_date - current_date).days
+                        subscription_days_left = days_left
+                    else:
+                        subscription_days_left = None
+                        return "Subscription Expired"
+
+                    return render_template('user.html', user_email=user_email, subscription_days_left=subscription_days_left)
+            else:
+                flash('Database connection failed.', 'danger')
+        except Exception as e:
+            flash('Error retrieving user data: ' + str(e), 'danger')
+
     return redirect(url_for('login'))
+
 
 
 driver = None
