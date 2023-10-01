@@ -1,4 +1,4 @@
-psycopg2-2.9.8
+psycopg2==2.9.8
 attrs==23.1.0
 beautifulsoup4==4.12.2
 blinker==1.6.2
