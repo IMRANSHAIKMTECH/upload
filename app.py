@@ -19,7 +19,7 @@ import psycopg2
 
 
 
-app = Flask(__name__, static_url_path='/static', template_folder='E:\\python\\school-(whatsapp application)\\templates')
+app = Flask(__name__)
 
 app.secret_key = '154'
 
