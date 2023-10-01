@@ -16,6 +16,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 import psycopg2
+from psycopg2 import sql
 
 
 
@@ -23,32 +24,55 @@ app = Flask(__name__)
 
 app.secret_key = '154'
 
+# PostgreSQL database configuration
+db_params = {
+    'dbname': 'users_mbbc',
+    'user': 'users_mbbc_user',
+    'password': 'SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ',
+    'host': 'dpg-ckckb66ct0pc73chqta0-a.oregon-postgres.render.com',
+    'port': '5432'
+}
 
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://users_mbbc_user:SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ@dpg-ckckb66ct0pc73chqta0-a/users_mbbc'
-
-# try:
-#     conn = psycopg2.connect(
-#         "dbname=users_mbbc user=users_mbbc_user password=SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ host=dpg-ckckb66ct0pc73chqta0-a port=5432"
-#     )
-#     print("Connection successful!")
-#     conn.close()
-# except Exception as e:
-#     print("Connection failed:", str(e))
-
+# Connect to the PostgreSQL database
+def connect_to_db():
+    try:
+        conn = psycopg2.connect(**db_params)
+        return conn
+    except Exception as e:
+        print("Connection failed:", str(e))
+        return None
 
 # Initialize the SQLAlchemy database
-db = SQLAlchemy(app)
-print("working db")
+def initialize_db():
+    conn = connect_to_db()
+    if conn is not None:
+        cursor = conn.cursor()
+        # Create a User table if it doesn't exist
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS user_data (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            created_date DATE NOT NULL,
+            expiry_date DATE
+        );
+        """
+        cursor.execute(create_table_sql)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("Database initialization completed.")
+
+initialize_db()
+
 # Define the User model to match the "user_data" table
-class User(db.Model):
-    __tablename__ = 'user_data'  # Specify the table name
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    created_date = db.Column(db.Date, nullable=False)
-    expiry_date = db.Column(db.Date)
+class User:
+    def __init__(self, id, email, password, created_date, expiry_date):
+        self.id = id
+        self.email = email
+        self.password = password
+        self.created_date = created_date
+        self.expiry_date = expiry_date
 
 excelfile=None
 # Routes for login, admin, and user pages
@@ -77,19 +101,33 @@ def homepage():
 @app.route('/all_data', methods=['GET'])
 def all_data():
     try:
-        users = User.query.all()
-        user_data = []
+        conn = connect_to_db()
+        if conn is not None:
+            cursor = conn.cursor()
 
-        for user in users:
-            user_data.append({
-                'id': user.id,
-                'email': user.email,
-                'password': user.password,
-                'created_date': user.created_date.strftime('%Y-%m-%d'),
-                'expiry_date': user.expiry_date.strftime('%Y-%m-%d') if user.expiry_date else None
-            })
+            # Execute a SELECT query to fetch all user records
+            select_query = "SELECT id, email, password, created_date, expiry_date FROM user_data"
+            cursor.execute(select_query)
+            
+            # Fetch all rows and store them in a list of dictionaries
+            user_data = []
+            for row in cursor.fetchall():
+                id, email, password, created_date, expiry_date = row
+                user_data.append({
+                    'id': id,
+                    'email': email,
+                    'password': password,
+                    'created_date': created_date.strftime('%Y-%m-%d'),
+                    'expiry_date': expiry_date.strftime('%Y-%m-%d') if expiry_date else None
+                })
 
-        return jsonify({'users': user_data})
+            # Close the cursor and connection
+            cursor.close()
+            conn.close()
+
+            return jsonify({'users': user_data})
+        else:
+            return jsonify({'error': 'Database connection failed'})
     except Exception as e:
         return jsonify({'error': str(e)})
 
