@@ -25,7 +25,8 @@ app.secret_key = '154'
 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://users_mbbc_user:SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ@dpg-ckckb66ct0pc73chqta0-a.oregon-postgres.render.com/users_mbbc'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://users_mbbc_user:SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ@dpg-ckckb66ct0pc73chqta0-a/users_mbbc'
+
 
 # Initialize the SQLAlchemy database
 db = SQLAlchemy(app)
