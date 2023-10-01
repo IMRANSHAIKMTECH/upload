@@ -218,20 +218,13 @@ import logging
 # send messages
 def create_driver():
     print("creating driver")
-    # Set the path to the ChromeDriver executable using a system property
-    os.environ['webdriver.chrome.driver'] = 'E:\\python\\school-(whatsapp application)\\chromedriver-win64 (1)\\chromedriver-win64\\chromedriver.exe'
 
-    # Create ChromeOptions and set the binary path
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.binary_location = 'E:\\python\\school-(whatsapp application)\\chrome-win64 (2)\\chrome-win64\\chrome.exe'
-    chrome_options.add_experimental_option("detach", True)
-
-    # Create a WebDriver instance (e.g., ChromeDriver) with the specified ChromeOptions
-    driver = webdriver.Chrome(options=chrome_options)
+    # Use webdriver_manager to download and manage ChromeDriver
+    driver = webdriver.Chrome(ChromeDriverManager().install())
 
     # Open WhatsApp Web
     driver.get('https://web.whatsapp.com/')
-    
+
     # Wait for 30 seconds for the QR code to be scanned
     time.sleep(30)
   
