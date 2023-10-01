@@ -25,7 +25,17 @@ app.secret_key = '154'
 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://users_mbbc_user:SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ@dpg-ckckb66ct0pc73chqta0-a/users_mbbc'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://users_mbbc_user:SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ@dpg-ckckb66ct0pc73chqta0-a/users_mbbc'
+import psycopg2
+
+try:
+    conn = psycopg2.connect(
+        "dbname=users_mbbc user=users_mbbc_user password=SxOuCWvFkV5wQnWKeiyiOEzz0HN4pKeJ host=dpg-ckckb66ct0pc73chqta0-a port=5432"
+    )
+    print("Connection successful!")
+    conn.close()
+except Exception as e:
+    print("Connection failed:", str(e))
 
 
 # Initialize the SQLAlchemy database
