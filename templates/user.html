@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <!-- basic -->
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <!-- mobile metas -->
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+      <!-- site metas -->
+      <title>User Dashboard</title>
+      <meta name="keywords" content="">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <!-- site icon -->
+      <link rel="icon" href="{{ url_for('static', filename='images/fevicon.png" type="image/png')}}" />
+      <!-- bootstrap css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+      <!-- site css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}" />
+      <!-- responsive css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css')}}" />
+      <!-- color css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/color_2.css')}}" />
+      <!-- select bootstrap -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-select.css')}}" />
+      <!-- scrollbar css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/perfect-scrollbar.css')}}" />
+      <!-- custom css -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css')}}" />
+      <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+      <![endif]-->
+
+
+      <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            display: grid;
+            /* justify-content: center;
+            justify-items: center; */
+        }
+
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        
+
+        #uploadForm {
+            max-width: 400px;
+            margin: 30px ;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.5s, box-shadow 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            justify-items: center;
+        }
+        #form2 {
+            max-width: 400px;
+            margin: 30px ;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.5s, box-shadow 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            justify-items: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        /* Textarea Styles */
+        textarea {
+            width: 100%;
+            padding: 2px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            resize: vertical;
+        }
+
+       
+        /* Alert Styles */
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* User Dashboard Header Styles */
+        h1 {
+            color: #333;
+        }
+
+        /* Logout Link Styles */
+        a {
+            text-decoration: none;
+            color: red;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        #tableform{
+            display: grid;
+            justify-content: center;
+            justify-items: center;
+            margin: 10px;
+        }
+        /* Style the subscription status box */
+.subscription-status {
+    background-color: #f0f0f0; /* Set the background color */
+    border: 1px solid #ddd; /* Add a border */
+    padding: 10px; /* Add some padding */
+    display: block; /* Make it inline to appear on the right */
+    float: right; /* Float it to the right */
+    margin-top: 10px; /* Add some top margin */
+}
+
+/* Style the span inside the box */
+.subscription-status span {
+    font-weight: bold; /* Make the text bold */
+    color: #333; /* Set the text color */
+}
+
+    </style>
+   </head>
+   <body class="dashboard dashboard_1">
+      <div class="full_container">
+         <div class="inner_container">
+            <!-- Sidebar  -->
+            <nav id="sidebar">
+               <div class="sidebar_blog_1">
+                  <div class="sidebar-header">
+                     <div class="logo_section">
+                        <a href="index.html"><img class="logo_icon img-responsive" src="{{ url_for('static', filename='images/logo/logo_icon.png') }}" alt="#" />
+                        </a>
+                     </div>
+                  </div>
+                  <div class="sidebar_user_info">
+                     <div class="icon_setting"></div>
+                     <div class="user_profle_side">
+                        <div class="user_img"><img class="img-responsive" src="{{ url_for('static', filename='images/layout_img/user_img.jpg')}}" alt="#" /></div>
+                        <div class="user_info">
+                           <h6>{{user_email}}</h6>
+                           <p><span class="online_animation"></span> Online</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               
+                     <div class="sidebar_blog_2">
+                        <h4>Menu</h4>
+                        <ul class="list-unstyled components">
+                           
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Attendance</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Marks Message</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Progress Report</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Exam Time Table</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Fees Message</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>Homework Message</span></a>
+                            </li>
+                            <li>
+                              <a href="#" class="toggle-link" data-target="uploadForm"><i class="fa fa-clock-o orange_color"></i> <span>other</span></a>
+                            </li>
+                            
+            </nav>
+            <!-- end sidebar -->
+            <!-- right content -->
+            <div id="content">
+               <!-- topbar -->
+               <div class="topbar">
+                  <nav class="navbar navbar-expand-lg navbar-light">
+                     <div class="full">
+                        <button type="button" id="sidebarCollapse" class="sidebar_toggle"><i class="fa fa-bars"></i></button>
+                        <div class="logo_section">
+                           <a href="index.html"><img class="img-responsive" src="{{ url_for('static', filename='images/logo/logo.png')}}" alt="#" /></a>
+                        </div>
+                        <div class="right_topbar">
+                           <div class="icon_info">
+                              <ul>
+                                 <li><a href="#"><i class="fa fa-bell-o"></i><span class="badge">2</span></a></li>
+                                 <li><a href="#"><i class="fa fa-question-circle"></i></a></li>
+                                 <li><a href="#"><i class="fa fa-envelope-o"></i><span class="badge">3</span></a></li>
+                              </ul>
+                              <ul class="user_profile_dd">
+                                 <li>
+                                    <a class="dropdown-toggle" data-toggle="dropdown"><img class="img-responsive rounded-circle" src="{{ url_for('static', filename='images/layout_img/user_img.jpg')}}" alt="#" /><span class="name_user">{{user_email}}</span></a>
+                                    <div class="dropdown-menu">
+                                       <a class="dropdown-item" href="#">My Profile</a>
+                                       <a class="dropdown-item" href="#">Settings</a>
+                                       <a class="dropdown-item" href="#">Help</a>
+                                       <a class="dropdown-item" href="/logout"><span>Log Out</span> <i class="fa fa-sign-out"></i></a>
+                                    </div>
+                                 </li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </nav>
+               </div>
+               <!-- end topbar -->
+
+
+               <h1>Welcome to Your User Dashboard</h1>
+    
+   
+    <!-- Display subscription status -->
+    {% if subscription_days_left %}
+<div class="subscription-status">
+    <p>Your subscription is ending in <span>{{ subscription_days_left }} days</span>.</p>
+</div>
+<!-- <p>Please contact the admin for renewal.</p> -->
+{% endif %}
+    
+    
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-{{ messages[0].category }}">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+    {% endwith %}
+     
+
+<!-- HTML structure for the forms and heading -->
+<div id="formContainer" style="display: none;">
+   <form id="uploadForm" method="POST" action="/show" enctype="multipart/form-data">
+      <input type="file" name="attfile" accept=".xlsx, .xls">
+      <input type="submit" value="Load File">
+   </form>
+
+   {% if error %}
+       <p>{{ error }}</p>
+   {% endif %} 
+
+   <ul id="columnNames">
+      <h2>Available Columns</h2>
+      {% for column in columns %}
+          <li><a href="#" class="column-link">{{ column }}</a></li>
+      {% endfor %}
+   </ul>
+
+   <form id="form2" action="/pr" method="post">
+       <h2>Message</h2>
+       <textarea name="usermessage" id="message4" rows="8" ></textarea>
+       <button type="submit">Start Sending</button>
+   </form>
+</div>
+
+<script>
+   // Function to toggle the visibility of the container and reset forms
+   function toggleFormContainer() {
+     const container = document.getElementById('formContainer');
+     if (container.style.display === 'none' || container.style.display === '') {
+       container.style.display = 'block'; // Show the container when the link is clicked
+       // Display form2 when the container is displayed
+       const form2 = document.getElementById('form2');
+       form2.style.display = 'block';
+     } else {
+       container.style.display = 'none'; // Hide the container when the link is clicked again
+       // Reset all forms in the container
+       const forms = container.querySelectorAll('form');
+       forms.forEach(function (form) {
+         form.reset();
+       });
+       const columnNames = document.getElementById('columnNames');
+       columnNames.style.display = 'none';
+     }
+   }
+
+   // Add click event listener to the links to show/hide the container and reset forms
+   const toggleLinks = document.querySelectorAll('.toggle-link');
+   toggleLinks.forEach(function (link) {
+     link.addEventListener('click', function (event) {
+       event.preventDefault();
+       toggleFormContainer();
+     });
+   });
+   const currentRoute = window.location.pathname;
+   if (currentRoute === '/show') {
+     toggleFormContainer(); // Show the container on the /show route
+   }
+</script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+          $('.column-link').click(function() {
+              var columnName = $(this).text();
+              var currentText = $('#message4').val();
+              if (currentText === '') {
+                  $('#message4').val('@' + columnName);
+              } else {
+                  $('#message4').val(currentText + ' @' + columnName);
+              }
+          });
+      });
+  </script>
+
+      <!-- jQuery -->
+      <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+      <!-- wow animation -->
+      <script src="{{ url_for('static', filename='js/animate.js')}}"></script>
+      <!-- select country -->
+      <script src="{{ url_for('static', filename='js/bootstrap-select.js')}}"></script>
+      <!-- owl carousel -->
+      <script src="{{ url_for('static', filename='js/owl.carousel.js')}}"></script> 
+      <!-- chart js -->
+      <script src="{{ url_for('static', filename='js/Chart.min.js')}}"></script>
+      <script src="{{ url_for('static', filename='js/Chart.bundle.min.js')}}"></script>
+      <script src="{{ url_for('static', filename='js/utils.js')}}"></script>
+      <script src="{{ url_for('static', filename='js/analyser.js')}}"></script>
+      <!-- nice scrollbar -->
+      <script src="{{ url_for('static', filename='js/perfect-scrollbar.min.js')}}"></script>
+      <script>
+         var ps = new PerfectScrollbar('#sidebar');
+      </script>
+      <!-- custom js -->
+      <script src="{{ url_for('static', filename='js/custom.js')}}"></script>
+      <script src="{{ url_for('static', filename='js/chart_custom_style1.js')}}"></script>
+      
+      
+   
+   </body>
+</html>

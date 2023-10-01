@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s, color 0.5s;
+            display: grid;
+            justify-content: center;
+            justify-items: center;
+        }
+
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+
+        #myForm {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.5s, box-shadow 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        /* Textarea Styles */
+        textarea {
+            width: 100%;
+            padding: 2px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            resize: vertical;
+        }
+
+        /* Dark mode toggle button */
+        #darkModeButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #darkModeButton:hover {
+            background-color: #555;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* User Dashboard Header Styles */
+        h1 {
+            color: #333;
+        }
+
+        /* Logout Link Styles */
+        a {
+            text-decoration: none;
+            color: red;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        #tableform{
+            display: grid;
+            justify-content: center;
+            justify-items: center;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to Your User Dashboard</h1>
+    
+    <!-- Display user information -->
+    <p>Your Name: {{ user_name }}</p>
+    <p>Email: {{ user_email }}</p>
+    
+    <!-- Display subscription status -->
+    {% if subscription_days_left %}
+    <p>Your subscription is ending in {{ subscription_days_left }} days.</p>
+    <!-- <p>Please contact the admin for renewal.</p> -->
+    {% endif %}
+    
+    <!-- Add other content specific to the user dashboard -->
+    
+    <!-- Add a logout button or link -->
+    <a href="/logout">Logout</a>
+
+    <!-- Dark mode toggle button -->
+    <button id="darkModeButton" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-{{ messages[0].category }}">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+    {% endwith %}
+    <form method="POST" action="/attendance" id="myForm" enctype="multipart/form-data">
+        <label for="fileInput">Upload Excel File:</label>
+        <input type="file" id="fileInput" name="excelFile">
+
+        <label for="attendanceList">Select an option:</label>
+        <select id="attendanceList" name="option">
+            <option value="0">Attendance</option>
+            <option value="1">Marks</option>
+            <!-- Add more options as needed -->
+        </select>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if absent_students %}
+    <h1>Absent Students</h1>
+    <form id="tableform" method="POST" action="/sendattendance">
+        <table>
+            <thead>
+                <tr>
+                    <th>Phone Number</th>
+                    <th>Student Name</th>
+                    <th>Messages</th>
+                    <th>Select Students</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in absent_students %}
+                <tr>
+                    <td>{{ student.phone_number }}</td>
+                    <td>{{ student.student_name }}</td>
+                    <td><textarea rows="5" cols="10" name="remarks_{{ student.phone_number }}" id='edited_message'>{{ student.default_messages }}</textarea></td>
+                    <td>
+                        <input type="checkbox" name="selected_students[]" value="{{ student.phone_number }}" checked>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" id="confirmButton">Confirm Send</button>
+    </form>
+    {% elif students %}
+    <h1>Marks of Students</h1>
+    <form id="tableform" method="POST" action="/sendmarks">
+        <table>
+            <thead>
+                <tr>
+                    <th>Phone Number</th>
+                    <th>Student Name</th>
+                    <th>English</th>
+                    <th>Hindi</th>
+                    <th>Maths</th>
+                    <th>SST</th>
+                    <th>Science</th>
+                    <th>Total</th>
+                    <th>Message</th>
+                    <th>Select Students</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.phone_number }}</td>
+                    <td>{{ student.student_name }}</td>
+                    <td>{{ student.english }}</td>
+                    <td>{{ student.hindi }}</td>
+                    <td>{{ student.maths }}</td>
+                    <td>{{ student.sst }}</td>
+                    <td>{{ student.science }}</td>
+                    <td>{{ student.total }}</td>
+                    <td><textarea rows="10" cols="20" name="remarks_{{ student.phone_number }}" id='edited_message'>{{ student.message }}</textarea></td>
+                    <td>
+                        <input type="checkbox" name="selected_students[]" value="{{ student.phone_number }}" checked>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" id="confirmButton">Confirm Send</button>
+    </form>
+    {% endif %}
+
+    <script>
+        function toggleDarkMode() {
+            const body = document.body;
+            const h1Elements = document.querySelectorAll('h1');
+
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                h1Elements.forEach((h1) => {
+                    h1.classList.remove('dark-mode');
+                });
+            } else {
+                body.classList.add('dark-mode');
+                h1Elements.forEach((h1) => {
+                    h1.classList.add('dark-mode');
+                });
+            }
+        }
+
+        document.getElementById('attendanceList').addEventListener('change', function () {
+            // Get the selected value from the dropdown list
+            const selectedValue = document.getElementById('attendanceList').value;
+
+            // Get the form element
+            const myForm = document.getElementById('myForm');
+
+            if (selectedValue === '0') {
+                // If it is '0', set the form's action and method for /attendance
+                // myForm.action = "/attendance";
+                // myForm.method = "post";
+            } else if (selectedValue === '1') {
+                // If it is '1', set the form's action and method for /marks
+                myForm.action = "/marks";
+                myForm.method = "post";
+            }
+            this.submit();
+        });
+    </script>
+</body>
+</html>
