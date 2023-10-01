@@ -184,15 +184,17 @@ def admin_page():
 
                 # Fetch all rows and store them in a list of dictionaries
                 users = []
+                # Remove strftime calls when fetching data
                 for row in cursor.fetchall():
                     id, email, password, created_date, expiry_date = row
                     users.append({
                         'id': id,
                         'email': email,
                         'password': password,
-                        'created_date': created_date.strftime('%Y-%m-%d'),
-                        'expiry_date': expiry_date.strftime('%Y-%m-%d') if expiry_date else None
+                        'created_date': created_date,  # Do not use strftime
+                        'expiry_date': expiry_date if expiry_date else None  # Do not use strftime
                     })
+
 
                 # Close the cursor and connection
                 cursor.close()
