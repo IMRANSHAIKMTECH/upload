@@ -430,7 +430,7 @@ df=None
 @app.route('/show', methods=['GET', 'POST'])
 def show():
     columns = []
-    global df
+
     if request.method == 'POST':
         try:
             # Check if a file is uploaded
@@ -448,8 +448,12 @@ def show():
                 return render_template('user.html', error='Invalid file format. Please upload an Excel file')
 
             # Read the Excel file and extract column names
+            global df
             df = pd.read_excel(file)
             columns = df.columns.tolist()
+            
+            # Store df in the session
+            session['df'] = df.to_json()  # Serialize DataFrame to JSON and store in the session
         except Exception as e:
             return render_template('user.html', error=f'Error reading Excel file: {str(e)}')
 
@@ -460,7 +464,7 @@ combined_data = []
 @app.route('/pr', methods=['POST'])
 def pr():
     print("working pr")
-    global combined_data, df
+    global df
 
     # Get the user's message from the form
     user_message = request.form.get('usermessage')
@@ -469,10 +473,13 @@ def pr():
     if not user_message:
         return "User message is missing."
 
-    # Check if 'df' has been loaded with data
-    if df is None:
+    # Retrieve df from the session
+    if 'df' not in session:
         return "No file to process."
 
+    df_json = session['df']
+    df = pd.read_json(df_json)  # Deserialize DataFrame from JSON
+    
     # Combine phone numbers with messages based on selected columns
     combined_data = []
     for index, row in df.iterrows():
