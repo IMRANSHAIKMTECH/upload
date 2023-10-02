@@ -368,8 +368,11 @@ def create_driver():
     print("creating driver")
 
     # Use webdriver_manager to download and manage ChromeDriver
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    service = Service(ChromeDriverManager().install())
+    print("working after serivce")
 
+    driver = webdriver.Chrome(service=service, options=options)
+    print("working driver")
     # Open WhatsApp Web
     driver.get('https://web.whatsapp.com/')
 
