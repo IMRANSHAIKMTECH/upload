@@ -432,29 +432,26 @@ def show():
     columns = []
     global df
     if request.method == 'POST':
-        # Check if a file is uploaded
-        if 'attfile' not in request.files:
-            return render_template('user.html', error='No file part')
-
-        file = request.files['attfile']
-        # excelfile= request.files['attfile']
-
-        # Check if the file has a name
-        if file.filename == '':
-            return render_template('user.html', error='No selected file')
-
-        # Check if it's an Excel file
-        if not file.filename.endswith('.xlsx') and not file.filename.endswith('.xls'):
-            return render_template('user.html', error='Invalid file format. Please upload an Excel file')
-
         try:
-            import pandas as pd
+            # Check if a file is uploaded
+            if 'attfile' not in request.files:
+                return render_template('user.html', error='No file part')
+
+            file = request.files['attfile']
+
+            # Check if the file has a name
+            if file.filename == '':
+                return render_template('user.html', error='No selected file')
+
+            # Check if it's an Excel file
+            if not file.filename.endswith('.xlsx') and not file.filename.endswith('.xls'):
+                return render_template('user.html', error='Invalid file format. Please upload an Excel file')
 
             # Read the Excel file and extract column names
             df = pd.read_excel(file)
             columns = df.columns.tolist()
         except Exception as e:
-            return render_template('user.html', error=str(e))
+            return render_template('user.html', error=f'Error reading Excel file: {str(e)}')
 
     return render_template('user.html', columns=columns)
 
@@ -463,7 +460,7 @@ combined_data = []
 @app.route('/pr', methods=['POST'])
 def pr():
     print("working pr")
-    global combined_data,df
+    global combined_data, df
 
     # Get the user's message from the form
     user_message = request.form.get('usermessage')
@@ -471,21 +468,10 @@ def pr():
     # Ensure that there are selected columns
     if not user_message:
         return "User message is missing."
-    import pandas as pd
 
-# Assuming 'excelfile' contains the file path or a file object
-    print(df)
-    # if excelfile is not None and not excelfile.closed:
-    #     try:
-    #         with pd.ExcelFile(excelfile) as xls:
-    #             df = pd.read_excel(xls, sheet_name='Sheet1')  # Replace 'Sheet1' with the actual sheet name
-    #     except Exception as e:
-    #         return f"Error reading Excel file: {str(e)}"
-    # else:
-    #     return "No file to process."
-
-
-            
+    # Check if 'df' has been loaded with data
+    if df is None:
+        return "No file to process."
 
     # Combine phone numbers with messages based on selected columns
     combined_data = []
