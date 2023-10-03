@@ -368,11 +368,16 @@ import logging
 def create_driver():
     print("creating driver")
 
+    chrome_options = webdriver.ChromeOptions()
     # Use webdriver_manager to download and manage ChromeDriver
-    service = Service(ChromeDriverManager().install())
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_experimental_option("detach", True)
+    chrome_options.add_argument('--disable-dev-shm-usage')
     print("working after serivce")
 
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome( options=options)
     print("working driver")
     # Open WhatsApp Web
     driver.get('https://web.whatsapp.com/')
