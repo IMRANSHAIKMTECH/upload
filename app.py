@@ -16,7 +16,7 @@ def hello_world():
 
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     driver = webdriver.Chrome(options=chrome_options)
 
@@ -49,7 +49,7 @@ def hello_world():
 
 
         ActionChains(driver).move_to_element(message_box).click().send_keys("using pythonanywhee").send_keys(Keys.ENTER).perform()
-
+        time.sleep(5)
 
         print("Message sent successfully!")
     except Exception as e:
