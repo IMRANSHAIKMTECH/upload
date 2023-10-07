@@ -26,7 +26,7 @@ def hello_world():
         print("Please scan the QR code with your phone.")
 
 
-        # time.sleep(20)
+        time.sleep(20)
 
 
         search_box_locator = (By.XPATH, '//div[@contenteditable="true" and @data-tab="3"]')
