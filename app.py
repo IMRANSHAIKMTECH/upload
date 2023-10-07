@@ -52,7 +52,8 @@ def hello_world():
 
 
         print("Message sent successfully!")
-
+    except Exception as e:
+        print("An error occurred:", str(e))
     finally:
 
         driver.quit()
